@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import get_object_or_404
 from .models import Post, Category, Tag
+from .forms import CommentForm
 from django.core.exceptions import PermissionDenied
 from django.utils.text import slugify
+
 
 class PostUpdate(LoginRequiredMixin, UpdateView):
     model = Post
@@ -46,7 +49,8 @@ class PostUpdate(LoginRequiredMixin, UpdateView):
 
         return response
 
-class PostList(ListView) :
+
+class PostList(ListView):
     model = Post
     ordering = '-pk'
 
@@ -57,6 +61,7 @@ class PostList(ListView) :
         return context
 
     # template_name = 'blog/post_list.html'
+
 
 # 믹스인 : 클래스를 상속하지 않고도 매소드를 조합할 수 있는 기법
 class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -74,8 +79,7 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
             tags_str = self.request.POST.get('tags_str')
             if tags_str:
-                tags_str = tags_str.strip()
-
+                tags_str = tags_str.strip('; ')
                 tags_str = tags_str.replace(',', ';')
                 tags_list = tags_str.split(';')
 
@@ -90,14 +94,17 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         else:
             return redirect('/blog/')
 
-class PostDetail(DetailView) :
+
+class PostDetail(DetailView):
     model = Post
 
     def get_context_data(self, **kwargs):
         context = super(PostDetail, self).get_context_data()
         context['categories'] = Category.objects.all()
         context['no_category_post_count'] = Post.objects.filter(category=None).count()
+        context['comment_form'] = CommentForm
         return context
+
 
 def category_page(request, slug):
     if slug == 'no_category':
@@ -118,6 +125,7 @@ def category_page(request, slug):
         }
     )
 
+
 def tag_page(request, slug):
     tag = Tag.objects.get(slug=slug)
     post_list = tag.post_set.all()
@@ -132,3 +140,20 @@ def tag_page(request, slug):
             'no_category_post_count': Post.objects.filter(category=None).count(),
         }
     )
+
+def new_comment(request, pk):
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post, pk=pk)
+
+        if request.method == 'POST':
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                comment.save()
+                return redirect(comment.get_absolute_url())
+            else:
+                return redirect(post.get_absolute_url())
+        else:
+            raise PermissionDenied
