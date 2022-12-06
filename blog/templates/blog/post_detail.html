@@ -28,7 +28,7 @@
 
                             <!-- Edit Post 버튼 추가 위치는 -->
                             {% if user.is_authenticated and user == post.author %}
-                                <a class="btn btn-info bnt-sm float-right" href="/blog/update_post/{{ post.pk }}" role="button">
+                                <a class="btn btn-info bnt-sm" href="/blog/update_post/{{ post.pk }}" role="button" float-right>
                                     <i class="fas fa-pen"></i>&nbsp;&nbsp;Edit Post
                                 </a>
                             {% endif %}
@@ -50,15 +50,13 @@
                             {{ post.get_content_markdown | safe }}
                         </section>
 
-                          {% if post.tags.exists %}
+                        {% if post.tags.exists %}
                             <i class="fa-solid fa-tags"></i>
                             {% for tag in post.tags.all %}
                                 <a href="{{ tag.get_absolute_url }}"><span class="badge badge-pill badge-light">{{ tag }}</span></a>
                             {% endfor %}
                             <br /><br />
-                          {% endif %}
-
-
+                        {% endif %}
 
                         {% if post.file_upload %}
                             <a href="{{ post.file_upload.url }}"
@@ -79,7 +77,6 @@
                                             {% csrf_token %}
                                             {{ comment_form | crispy }}
                                             <button type="submit" class="btn btn-primary mb-5">Submit</button>
-
                                         </form>
                                     {% else %}
                                         <a role="button" class="btn btn-outline-dark btn-block btn-sm my-3" href="#" data-toggle="modal" data-target="#loginModal">Log in and leave a comment</a>
@@ -91,7 +88,31 @@
                                             <div class="flex-shrink-0 mr-3"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
                                             <div class="ms-3">
                                                 {% if user.is_authenticated and comment.author == user %}
-                                                    <a role="button" class="brn btn-sm btn-info float-right" id="comment-{{ comment.pk }}-update-btn" href="/blog/update_comment/{{ comment.pk }}/">edit</a>
+                                                    <div class="float-right">
+                                                        <a role="button" class="brn btn-sm btn-info float-right" id="comment-{{ comment.pk }}-update-btn" href="/blog/update_comment/{{ comment.pk }}/">edit</a>
+                                                        <a role="button" href="#" id="comment-{{ comment.pk }}-delete-modal-btn" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteCommentModal-{{ comment.pk }}">
+                                                            delete
+                                                        </a>
+                                                    </div>
+                                                    <div class="modal fade" id="deleteCommentModal-{{ comment.pk }}" tabindex="-1" role="dialog" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="deleteCommentModalLabel">Are You Sure?</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&time;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <del>{{ comment | linebreaks }}</del>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                    <a role="button" class="btn btn-danger" href="/blog/delete_comment/{{ comment.pk }}/">Delete</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 {% endif %}
                                                 <div class="fw-bold">{{ comment.author.username }} &nbsp;&nbsp; <small class="text-muted">{{ comment.created_at }}</small></div>
                                                 <p>{{ comment.content  | linebreaks }}</p>
