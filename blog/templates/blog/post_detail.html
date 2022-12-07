@@ -28,7 +28,7 @@
 
                             <!-- Edit Post 버튼 추가 위치는 -->
                             {% if user.is_authenticated and user == post.author %}
-                                <a class="btn btn-info bnt-sm" href="/blog/update_post/{{ post.pk }}" role="button" float-right>
+                                <a class="btn btn-info bnt-sm float-right" href="/blog/update_post/{{ post.pk }}" role="button">
                                     <i class="fas fa-pen"></i>&nbsp;&nbsp;Edit Post
                                 </a>
                             {% endif %}
@@ -91,7 +91,7 @@
                                             <div class="ms-3">
                                                 {% if user.is_authenticated and comment.author == user %}
                                                     <div class="float-right">
-                                                        <a role="button" class="brn btn-sm btn-info float-right" id="comment-{{ comment.pk }}-update-btn" href="/blog/update_comment/{{ comment.pk }}/">edit</a>
+                                                        <a role="button" class="btn btn-sm btn-info float-right" id="comment-{{ comment.pk }}-update-btn" href="/blog/update_comment/{{ comment.pk }}/">edit</a>
                                                         <a role="button" href="#" id="comment-{{ comment.pk }}-delete-modal-btn" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteCommentModal-{{ comment.pk }}">
                                                             delete
                                                         </a>

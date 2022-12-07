@@ -81,7 +81,7 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
             tags_str = self.request.POST.get('tags_str')
             if tags_str:
-                tags_str = tags_str.strip('; ')
+                tags_str = tags_str.strip(';')
                 tags_str = tags_str.replace(',', ';')
                 tags_list = tags_str.split(';')
 
